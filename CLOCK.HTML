@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fullscreen Neon Live Clock</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --pink: #ff4fd8;
+      --cyan: #00f7ff;
+      --yellow: #ffe066;
+      --white: #ffffff;
+      --bg1: #090014;
+      --bg2: #16082f;
+      --bg3: #22003d;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 79, 216, 0.15), transparent 20%),
+        radial-gradient(circle at 80% 30%, rgba(0, 247, 255, 0.12), transparent 22%),
+        radial-gradient(circle at 50% 85%, rgba(255, 224, 102, 0.10), transparent 18%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .stars,
+    .particles,
+    .floating-icons {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    .particle {
+      position: absolute;
+      bottom: -20px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      filter: blur(1px);
+      animation: rise linear infinite;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-110vh) scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    .float-icon {
+      position: absolute;
+      font-size: 1.6rem;
+      opacity: 0.22;
+      animation: drift ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateY(0px) translateX(0px) rotate(0deg);
+      }
+      to {
+        transform: translateY(-20px) translateX(18px) rotate(8deg);
+      }
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.55;
+      animation: orbMove 8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .orb1 {
+      width: 300px;
+      height: 300px;
+      background: var(--pink);
+      top: 10%;
+      left: 8%;
+    }
+
+    .orb2 {
+      width: 360px;
+      height: 360px;
+      background: var(--cyan);
+      bottom: 8%;
+      right: 8%;
+      animation-delay: 1.2s;
+    }
+
+    .orb3 {
+      width: 220px;
+      height: 220px;
+      background: var(--yellow);
+      bottom: 18%;
+      left: 18%;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes orbMove {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+      to {
+        transform: translate(20px, -25px) scale(1.08);
+      }
+    }
+
+    .clock-wrap {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 1100px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .top-label {
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      color: #ffc8f2;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      text-shadow: 0 0 8px var(--pink), 0 0 18px var(--pink);
+      animation: softPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes softPulse {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 1; }
+    }
+
+    .time {
+      font-family: "Courier New", monospace;
+      font-size: clamp(4rem, 14vw, 11rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 8px;
+      color: #97fbff;
+      text-shadow:
+        0 0 8px var(--cyan),
+        0 0 20px var(--cyan),
+        0 0 40px var(--cyan),
+        0 0 70px rgba(0, 247, 255, 0.55);
+      margin-bottom: 18px;
+    }
+
+    .seconds {
+      font-size: 0.35em;
+      vertical-align: super;
+      margin-left: 8px;
+      color: #ffd2f6;
+      text-shadow:
+        0 0 8px var(--pink),
+        0 0 20px var(--pink);
+    }
+
+    .blink {
+      animation: blink 1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.35; }
+    }
+
+    .date {
+      font-size: clamp(1.1rem, 2.3vw, 1.8rem);
+      color: #fff2a8;
+      margin-bottom: 14px;
+      text-shadow: 0 0 10px rgba(255, 224, 102, 0.75);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .pill {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f8f8ff;
+      font-size: 1rem;
+      backdrop-filter: blur(10px);
+      box-shadow:
+        inset 0 0 8px rgba(255,255,255,0.03),
+        0 0 18px rgba(255,255,255,0.04);
+    }
+
+    .bottom-note {
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #ddd8ff;
+      opacity: 0.9;
+      letter-spacing: 0.5px;
+    }
+
+    .cute-bar {
+      width: min(460px, 70vw);
+      height: 8px;
+      margin: 24px auto 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(255,255,255,0.08);
+    }
+
+    .cute-bar-fill {
+      height: 100%;
+      width: 40%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--pink), var(--cyan), var(--yellow));
+      box-shadow:
+        0 0 10px var(--pink),
+        0 0 16px var(--cyan);
+      animation: barMove 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes barMove {
+      from { transform: translateX(0%); width: 30%; }
+      to { transform: translateX(220%); width: 45%; }
+    }
+
+    @media (max-width: 700px) {
+      .time {
+        letter-spacing: 3px;
+      }
+
+      .pill {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb orb1"></div>
+  <div class="glow-orb orb2"></div>
+  <div class="glow-orb orb3"></div>
+
+  <div class="stars" id="stars"></div>
+  <div class="particles" id="particles"></div>
+  <div class="floating-icons" id="floatingIcons"></div>
+
+  <div class="clock-wrap">
+    <div class="top-label">✨ Cute Neon LED Clock ✨</div>
+    <div class="time" id="time">00<span class="blink">:</span>00<span class="seconds">00</span></div>
+    <div class="date" id="date">Loading date...</div>
+
+    <div class="info-row">
+      <div class="pill" id="timezone">Timezone: Loading...</div>
+      <div class="pill" id="dstStatus">Checking Daylight Saving...</div>
+      <div class="pill" id="greeting">Hello ✨</div>
+    </div>
+
+    <div class="cute-bar">
+      <div class="cute-bar-fill"></div>
+    </div>
+
+    <div class="bottom-note">Live time • automatic daylight saving • full screen neon vibes 💖</div>
+  </div>
+
+  <script>
+    function isDST(date = new Date()) {
+      const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+      const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+      return date.getTimezoneOffset() < Math.max(jan, jul);
+    }
+
+    function getGreeting(hour) {
+      if (hour < 12) return "Good Morning 🌞";
+      if (hour < 17) return "Good Afternoon 🌈";
+      if (hour < 21) return "Good Evening 🌙";
+      return "Sweet Night ✨";
+    }
+
+    function updateClock() {
+      const now = new Date();
+
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+
+      document.getElementById("time").innerHTML =
+        `${hours}<span class="blink">:</span>${minutes}<span class="seconds">${seconds}</span>`;
+
+      document.getElementById("date").textContent = now.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById("timezone").textContent = `Timezone: ${tz}`;
+
+      document.getElementById("dstStatus").textContent = isDST(now)
+        ? "🌞 Daylight Saving Active"
+        : "🌙 Standard Time Active";
+
+      document.getElementById("greeting").textContent = getGreeting(now.getHours());
+    }
+
+    function createStars(count = 80) {
+      const stars = document.getElementById("stars");
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.left = Math.random() * 100 + "vw";
+        star.style.top = Math.random() * 100 + "vh";
+        star.style.animationDuration = (1.5 + Math.random() * 3) + "s";
+        star.style.animationDelay = (Math.random() * 3) + "s";
+        star.style.opacity = Math.random();
+        stars.appendChild(star);
+      }
+    }
+
+    function createParticles(count = 25) {
+      const particles = document.getElementById("particles");
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.width = p.style.height = (4 + Math.random() * 10) + "px";
+        p.style.animationDuration = (6 + Math.random() * 10) + "s";
+        p.style.animationDelay = (Math.random() * 10) + "s";
+        p.style.background = Math.random() > 0.5
+          ? "rgba(255, 79, 216, 0.22)"
+          : "rgba(0, 247, 255, 0.22)";
+        particles.appendChild(p);
+      }
+    }
+
+    function createFloatingIcons() {
+      const iconsWrap = document.getElementById("floatingIcons");
+      const icons = ["💖", "✨", "🌙", "⭐", "💫", "🩷"];
+      for (let i = 0; i < 12; i++) {
+        const icon = document.createElement("div");
+        icon.className = "float-icon";
+        icon.textContent = icons[Math.floor(Math.random() * icons.length)];
+        icon.style.left = Math.random() * 100 + "vw";
+        icon.style.top = Math.random() * 100 + "vh";
+        icon.style.animationDuration = (4 + Math.random() * 5) + "s";
+        icon.style.animationDelay = (Math.random() * 3) + "s";
+        icon.style.fontSize = (1.2 + Math.random() * 1.6) + "rem";
+        iconsWrap.appendChild(icon);
+      }
+    }
+
+    createStars();
+    createParticles();
+    createFloatingIcons();
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
